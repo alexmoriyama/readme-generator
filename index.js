@@ -2,10 +2,11 @@
 
 const inquirer = require("inquirer");
 const fs = require("fs");
-const generateMarkdown = require("./generateMarkdown")
+const generateMarkdown = require("./util/generateMarkdown.js");
+const path = require("path");
 
 //  Create a function to write README file
-inquirer.prompt([
+const questions =([
   {
     type: "input",
     name: "title",
@@ -31,17 +32,34 @@ inquirer.prompt([
     name: "credits",
     message: "List your collaborators, if any, with links to their GitHub profiles.",
   },
+  {
+    type: "list",
+    name: "license",
+    message: "What license did you use?",
+    choices: ['MIT', 'GPL', 'Apache', 'GNU'],
+  },
+  {
+    type: "input",
+    name: "git",
+    message: "Please provide a link to your github account.",
+  },
+  {
+    type: "input",
+    name: "email",
+    message: "Please provide a link to your email account.",
+  },
 ]);
 
 //  Create a function to initialize app
-function init(readMe) {
-  const htmlPageContent = generateHTML(readMe);
-
-  fs.writeFile(`./output/README.md`, generateMarkdown({...answers}), (err) => {
-    if (err) {
-      throw err;
-    }
-  }); console.log("Successfully created README.md")
-  ;
+function writeToFile(fileName, data) {
+  return fs.writeFileSync(path.join(process.cwd(), fileName), data);
 }
 
+function init() {
+  inquirer.prompt(questions).then((answers) => {
+    console.log("Your ReadMe has been created!");
+    writeToFile("./util/README.md", generateMarkdown({ ...answers }));
+  });
+}
+
+init();
